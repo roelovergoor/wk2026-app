@@ -1,0 +1,59 @@
+name: Build Android App Bundle (TWA)
+
+# Draait automatisch bij elke push naar main, en kan ook handmatig gestart worden
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-aab:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Java (vereist voor Android build)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # Bouwt de React/Vite-app (zorgt dat de site lokaal getest/gevalideerd is)
+      - name: Install dependencies & build web app
+        run: |
+          npm install
+          npm run build
+
+      # Bubblewrap genereert het Android-project op basis van de live URL
+      # LET OP: vervang DEPLOY_URL hieronder door je echte Vercel-URL,
+      # of zet 'm als repository secret/variable PWA_URL.
+      - name: Install Bubblewrap CLI
+        run: npm install -g @bubblewrap/cli
+
+      - name: Initialize TWA project
+        env:
+          PWA_URL: ${{ vars.PWA_URL || 'https://jouw-app.vercel.app' }}
+        run: |
+          mkdir -p twa-project
+          cd twa-project
+          bubblewrap init --manifest "${PWA_URL}/manifest.webmanifest" --directory . <<< "
+"
+
+      - name: Build Android App Bundle
+        run: |
+          cd twa-project
+          bubblewrap build
+
+      # Maakt het resulterende .aab-bestand downloadbaar als build-artifact
+      - name: Upload .aab as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-bundle
+          path: twa-project/app/build/outputs/bundle/release/*.aab
