@@ -24,29 +24,23 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
       - name: Install dependencies and build web app
         run: |
           npm install
           npm run build
 
-      - name: Install Bubblewrap CLI
-        run: npm install -g @bubblewrap/cli
+      - name: Install PWABuilder CLI
+        run: npm install -g @pwabuilder/pwabuilder
 
-      - name: Initialize TWA project
-        env:
-          JAVA_HOME: ${{ env.JAVA_HOME }}
+      - name: Generate Android package
         run: |
-          mkdir -p twa-project
-          cd twa-project
-          echo "n" | bubblewrap init --manifest "${{ vars.PWA_URL }}/manifest.webmanifest" --directory . --skipPwaValidation
-
-      - name: Build Android App Bundle
-        run: |
-          cd twa-project
-          echo "n" | bubblewrap build
+          pwabuilder package -p android -u ${{ vars.PWA_URL }} -d ./android-output
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-bundle
-          path: twa-project/app/build/outputs/bundle/release/*.aab
+          path: ./android-output/**/*.aab
