@@ -9,6 +9,9 @@ jobs:
   build-aab:
     runs-on: ubuntu-latest
 
+    env:
+      PWA_MANIFEST: "https://wk2026-g0v5dfgws-roelovergoor.vercel.app/manifest.webmanifest"
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -16,7 +19,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -38,23 +41,13 @@ jobs:
       - name: Configure Bubblewrap
         run: |
           mkdir -p ~/.bubblewrap
-          cat > ~/.bubblewrap/config.json << 'EOF'
-          {
-            "jdkPath": "$JAVA_HOME",
-            "androidSdkPath": "$ANDROID_SDK_ROOT"
-          }
-          EOF
+          echo "{\"jdkPath\":\"$JAVA_HOME\",\"androidSdkPath\":\"$ANDROID_SDK_ROOT\"}" > ~/.bubblewrap/config.json
 
       - name: Initialize TWA project
         run: |
           mkdir -p twa-project
           cd twa-project
-          bubblewrap init \
-            --manifest "${{ vars.PWA_URL }}/manifest.webmanifest" \
-            --directory . \
-            --skipPwaValidation \
-            --jdkPath "$JAVA_HOME" \
-            --androidSdkPath "$ANDROID_SDK_ROOT"
+          bubblewrap init --manifest "$PWA_MANIFEST" --directory . --skipPwaValidation --jdkPath "$JAVA_HOME" --androidSdkPath "$ANDROID_SDK_ROOT"
 
       - name: Build Android App Bundle
         run: |
