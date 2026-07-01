@@ -16,7 +16,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 20
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -32,15 +32,37 @@ jobs:
           npm install
           npm run build
 
-      - name: Install PWABuilder CLI
-        run: npm install -g @pwabuilder/pwabuilder
+      - name: Install Bubblewrap CLI
+        run: npm install -g @bubblewrap/cli
 
-      - name: Generate Android package
+      - name: Configure Bubblewrap
         run: |
-          pwabuilder package -p android -u ${{ vars.PWA_URL }} -d ./android-output
+          mkdir -p ~/.bubblewrap
+          cat > ~/.bubblewrap/config.json << 'EOF'
+          {
+            "jdkPath": "$JAVA_HOME",
+            "androidSdkPath": "$ANDROID_SDK_ROOT"
+          }
+          EOF
+
+      - name: Initialize TWA project
+        run: |
+          mkdir -p twa-project
+          cd twa-project
+          bubblewrap init \
+            --manifest "${{ vars.PWA_URL }}/manifest.webmanifest" \
+            --directory . \
+            --skipPwaValidation \
+            --jdkPath "$JAVA_HOME" \
+            --androidSdkPath "$ANDROID_SDK_ROOT"
+
+      - name: Build Android App Bundle
+        run: |
+          cd twa-project
+          bubblewrap build --skipSigning
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-bundle
-          path: ./android-output/**/*.aab
+          path: twa-project/app/build/outputs/bundle/release/*.aab
