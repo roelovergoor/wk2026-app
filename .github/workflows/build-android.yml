@@ -26,15 +26,8 @@ jobs:
         run: |
           git clone https://github.com/GoogleChromeLabs/svgomg-twa android-project
           cd android-project
-          sed -i 's|https://jakearchibald.github.io/svgomg/|https://wk2026-g0v5dfgws-roelovergoor.vercel.app/|g' app/build.gradle
-          sed -i 's|jakearchibald.github.io|wk2026-g0v5dfgws-roelovergoor.vercel.app|g' app/build.gradle
-          sed -i 's|SVGOMG|WK 2026 Kaarten|g' app/src/main/res/values/strings.xml
-
-      - name: Build AAB
-        run: |
-          cd android-project
-          chmod +x gradlew
-          ./gradlew bundleRelease
+          find . -name "*.gradle" | xargs grep -l "jakearchibald" || true
+          find . -name "strings.xml" || true
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
