@@ -22,12 +22,23 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Create TWA Android project
+      - name: Clone and configure TWA project
         run: |
           git clone https://github.com/GoogleChromeLabs/svgomg-twa android-project
           cd android-project
-          find . -name "*.gradle" | xargs grep -l "jakearchibald" || true
-          find . -name "strings.xml" || true
+          GRADLE_FILE=$(find . -name "*.gradle" | xargs grep -l "jakearchibald" | head -1)
+          echo "Gevonden: $GRADLE_FILE"
+          sed -i 's|https://jakearchibald.github.io/svgomg/|https://wk2026-g0v5dfgws-roelovergoor.vercel.app/|g' "$GRADLE_FILE"
+          sed -i 's|jakearchibald.github.io|wk2026-g0v5dfgws-roelovergoor.vercel.app|g' "$GRADLE_FILE"
+          STRINGS_FILE=$(find . -name "strings.xml" | head -1)
+          echo "Gevonden: $STRINGS_FILE"
+          sed -i 's|SVGOMG|WK 2026 Kaarten|g' "$STRINGS_FILE"
+
+      - name: Build AAB
+        run: |
+          cd android-project
+          chmod +x gradlew
+          ./gradlew bundleRelease
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
