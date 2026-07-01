@@ -33,16 +33,17 @@ jobs:
         run: npm install -g @bubblewrap/cli
 
       - name: Initialize TWA project
+        env:
+          JAVA_HOME: ${{ env.JAVA_HOME }}
         run: |
           mkdir -p twa-project
           cd twa-project
-          echo '{"host":"${{ vars.PWA_URL }}","name":"WK 2026 Kaarten","launcherName":"WK2026","display":"standalone","themeColor":"#0f172a","backgroundColor":"#0f172a","startUrl":"/","iconUrl":"${{ vars.PWA_URL }}/icon-512.png","maskableIconUrl":"${{ vars.PWA_URL }}/icon-512.png","appVersion":"1","signingMode":"none","generatorApp":"bubblewrap-cli"}' > twa-manifest.json
-          bubblewrap init --manifest "${{ vars.PWA_URL }}/manifest.webmanifest" --directory . --skipPwaValidation
+          echo "n" | bubblewrap init --manifest "${{ vars.PWA_URL }}/manifest.webmanifest" --directory . --skipPwaValidation
 
       - name: Build Android App Bundle
         run: |
           cd twa-project
-          bubblewrap build
+          echo "n" | bubblewrap build
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
