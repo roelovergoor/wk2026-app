@@ -22,13 +22,12 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Clone and inspect TWA project
+      - name: Clone and configure TWA project
         run: |
           git clone https://github.com/GoogleChromeLabs/svgomg-twa android-project
           cd android-project
-          find . -name "*.gradle" | head -20
-          find . -name "strings.xml" | head -5
-          cat $(find . -name "*.gradle" | head -1)
+          echo "=== app/build.gradle ===" && cat app/build.gradle
+          echo "=== strings.xml ===" && find . -name "strings.xml" -exec cat {} \;
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
