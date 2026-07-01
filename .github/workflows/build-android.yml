@@ -16,7 +16,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -36,7 +36,8 @@ jobs:
         run: |
           mkdir -p twa-project
           cd twa-project
-          bubblewrap init --manifest "${{ vars.PWA_URL }}/manifest.webmanifest" --directory .
+          echo '{"host":"${{ vars.PWA_URL }}","name":"WK 2026 Kaarten","launcherName":"WK2026","display":"standalone","themeColor":"#0f172a","backgroundColor":"#0f172a","startUrl":"/","iconUrl":"${{ vars.PWA_URL }}/icon-512.png","maskableIconUrl":"${{ vars.PWA_URL }}/icon-512.png","appVersion":"1","signingMode":"none","generatorApp":"bubblewrap-cli"}' > twa-manifest.json
+          bubblewrap init --manifest "${{ vars.PWA_URL }}/manifest.webmanifest" --directory . --skipPwaValidation
 
       - name: Build Android App Bundle
         run: |
