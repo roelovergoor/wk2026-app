@@ -26,8 +26,19 @@ jobs:
         run: |
           git clone https://github.com/GoogleChromeLabs/svgomg-twa android-project
           cd android-project
-          echo "=== app/build.gradle ===" && cat app/build.gradle
-          echo "=== strings.xml ===" && find . -name "strings.xml" -exec cat {} \;
+          sed -i "s|applicationId: 'org.chromium.twa.svgomg'|applicationId: 'nl.roelovergoor.wk2026'|g" app/build.gradle
+          sed -i "s|hostName: 'svgomg.firebaseapp.com'|hostName: 'wk2026-g0v5dfgws-roelovergoor.vercel.app'|g" app/build.gradle
+          sed -i "s|name: 'SVGOMG TWA'|name: 'WK 2026 Kaarten'|g" app/build.gradle
+          sed -i "s|themeColor: '#303F9F'|themeColor: '#0f172a'|g" app/build.gradle
+          sed -i "s|navigationColor: '#303F9F'|navigationColor: '#0f172a'|g" app/build.gradle
+          sed -i "s|backgroundColor: '#bababa'|backgroundColor: '#0f172a'|g" app/build.gradle
+          echo "=== Controle ===" && grep -E "applicationId|hostName|name:" app/build.gradle | head -5
+
+      - name: Build AAB
+        run: |
+          cd android-project
+          chmod +x gradlew
+          ./gradlew bundleRelease
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
